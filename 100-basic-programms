@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Installing category basic tools"
+
+sudo pacman -Syyu
+sudo pacman -S bc rsync mlocate bash-completion pkgstats arch-wiki-lite
+sudo pacman -S zip unzip unrar p7zip lzop cpio
+
+sudo pacman -S avahi nss-mdns
+sudo system_ctl enable avahi-daemon
+
+sudo pacman -S alsa-utils alsa-plugins
+sudo pacman -S pulseaudio pulseaudio-alsa
+
+sudo pacman -S ntfs-3g dosfstools exfat-utils f2fs-tools fuse fuse-exfat autofs mtpfs
