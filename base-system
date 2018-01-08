@@ -82,11 +82,11 @@ arch-chroot $MOUNTPOINT /bin/bash -c "passwd"
 
 # setup pacman conf
 cp /etc/pacman.d/mirrorlist  $MOUNTPOINT/etc/pacman.d/
-arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#Color/Color/'"\n"'ILoveCandy' $MOUNTPOINT/etc/pacman.conf"
-arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#TotalDownload/TotalDownload/' $MOUNTPOINT/etc/pacman.conf"
-arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#VerbosePkgLists/VerbosePkgLists/' $MOUNTPOINT/etc/pacman.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#Color/Color\nILoveCandy/' /etc/pacman.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#TotalDownload/TotalDownload/' /etc/pacman.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#VerbosePkgLists/VerbosePkgLists/' /etc/pacman.conf"
 
-local _has_multilib=`grep -n "\[multilib\]" $MOUNTPOINT/etc/pacman.conf | cut -f1 -d:`
+_has_multilib=`grep -n "\[multilib\]" $MOUNTPOINT/etc/pacman.conf | cut -f1 -d:`
 sed -i "${_has_multilib}s/^#//" $MOUNTPOINT/etc/pacman.conf
-local _has_multilib=$(( ${_has_multilib} + 1 ))
+_has_multilib=$(( ${_has_multilib} + 1 ))
 sed -i "${_has_multilib}s/^#//" $MOUNTPOINT/etc/pacman.conf
