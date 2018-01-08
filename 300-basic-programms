@@ -3,6 +3,7 @@
 echo "Installing category basic tools"
 
 sudo pacman -Syyu
+
 sudo pacman -S bc rsync mlocate bash-completion pkgstats arch-wiki-lite
 sudo pacman -S zip unzip unrar p7zip lzop cpio
 
