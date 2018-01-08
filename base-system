@@ -37,7 +37,7 @@ echo 'LANG="'$LOCALE_UTF8'"' >> ${MOUNTPOINT}/etc/vconsole.conf
 echo "HARDWARECLOCK=\"UTC\"" >> ${MOUNTPOINT}/etc/vconsole.conf
 echo "TIMEZONE=\"Europe/Kiev\"" >> ${MOUNTPOINT}/etc/vconsole.conf
 echo "USECOLOR=\"yes\"" >> ${MOUNTPOINT}/etc/vconsole.conf
-echo "FONT=\"ter-v16v\"" >> ${MOUNTPOINT}/etc/vconsole.conf
+echo "FONT=\"ter-v16n\"" >> ${MOUNTPOINT}/etc/vconsole.conf
 
 # make fstab
 
