@@ -1,0 +1,18 @@
+#!/bin/bash
+
+[[ ! -d aui_packages ]] && mkdir aui_packages
+cd aui_packages
+
+curl -o package-query.tar.gz https://aur.archlinux.org/cgit/aur.git/snapshot/package-query.tar.gz
+tar zxvf package-query.tar.gz
+rm package-query.tar.gz
+cd package-query
+makepkg -csi --noconfirm
+
+curl -o yaourt.tar.gz https://aur.archlinux.org/cgit/aur.git/snapshot/yaourt.tar.gz
+tar zxvf yaourt.tar.gz
+rm yaourt.tar.gz
+cd yaourt
+makepkg -csi --noconfirm
+
+sudo pacman -D --asdeps package-query
