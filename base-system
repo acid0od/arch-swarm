@@ -58,6 +58,9 @@ arch-chroot $MOUNTPOINT /bin/bash -c "echo \"FallbackNTP=0.pool.ntp.org 1.pool.n
 arch-chroot $MOUNTPOINT /bin/bash -c "systemctl enable systemd-timesyncd.service"
 
 # setup locale
+printf "%$(tput cols)s\n"|tr ' ' '-'
+echo -e "# Prepare to setup locale"
+read -e -sn 1 -p "Press enter to continue..."
 
 echo 'LANG="'$LOCALE_UTF8'"' > ${MOUNTPOINT}/etc/locale.conf
 arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#'${LOCALE_UTF8}'/'${LOCALE_UTF8}'/' /etc/locale.gen"
@@ -76,3 +79,14 @@ arch-chroot $MOUNTPOINT /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
 
 # setup root password
 arch-chroot $MOUNTPOINT /bin/bash -c "passwd"
+
+# setup pacman conf
+cp /etc/pacman.d/mirrorlist  $MOUNTPOINT/etc/pacman.d/
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#Color/Color/'"\n"'ILoveCandy' $MOUNTPOINT/etc/pacman.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#TotalDownload/TotalDownload/' $MOUNTPOINT/etc/pacman.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#VerbosePkgLists/VerbosePkgLists/' $MOUNTPOINT/etc/pacman.conf"
+
+local _has_multilib=`grep -n "\[multilib\]" $MOUNTPOINT/etc/pacman.conf | cut -f1 -d:`
+sed -i "${_has_multilib}s/^#//" $MOUNTPOINT/etc/pacman.conf
+local _has_multilib=$(( ${_has_multilib} + 1 ))
+sed -i "${_has_multilib}s/^#//" $MOUNTPOINT/etc/pacman.conf
