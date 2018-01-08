@@ -1,0 +1,15 @@
+#!/bin/bash
+
+pacman -S xorg-server xorg-apps xorg-server-xwayland xorg-xinit xorg-xkill xorg-xinput xf86-input-libinput mesa
+pacman -S --asdeps --needed cairo fontconfig freetype2
+
+
+pacman -Syyu
+pacman -S lightdm lightdm-gtk-greeter lightdm-gtk-greeter-settings --noconfirm --needed
+pacman -S --noconfirm --needed i3lock i3status
+
+su - acid -c "yaourt -S --noconfirm --needed i3-gaps-next-git"
+
+systemctl enable lightdm.service -f
+systemctl set-default graphical.target
+
