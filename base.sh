@@ -1,0 +1,76 @@
+#!/bin/sh
+#
+# Launch after mount root partision on to /mnt
+# 
+
+LOCALE_UTF8=en_US.UTF-8
+ZONE=Europe
+SUBZONE=Kiev
+BOOT_MOUNTPOINT=/dev/sda
+MOUNTPOINT=/mnt
+host_name=tux
+
+# Change Mirror
+
+pacman -S --noconfirm --needed reflector
+
+reflector -l 100 -f 50 -c UA -c RU -c RO -c CZ -c PL -c BE -c NL -c FR -c DE -c GB --sort rate --threads 5 --verbose --save /tmp/mirrorlist.new && rankmirrors -n 0 /tmp/mirrorlist.new > /tmp/mirrorlist && sudo cp /tmp/mirrorlist /etc/pacman.d
+
+# Base system
+
+pacman -Sy archlinux-keyring
+pacstrap ${MOUNTPOINT} base linux-headers
+pacstrap ${MOUNTPOINT} base-devel parted f2fs-tools ntp net-tools terminus-font
+
+WIRED_DEV=`ip link | grep "ens\|eno\|enp" | awk '{print $2}'| sed 's/://' | sed '1!d'`
+
+if [[ -n $WIRED_DEV ]]; then
+    arch-chroot $MOUNTPOINT /bin/bash -c "systemctl enable dhcpcd@${WIRED_DEV}.service"
+fi
+
+# Add keymap
+
+echo "KEYMAP=ru" > ${MOUNTPOINT}/etc/vconsole.conf
+echo 'LANG="'$LOCALE_UTF8'"' >> ${MOUNTPOINT}/etc/vconsole.conf
+echo "HARDWARECLOCK=\"UTC\"" >> ${MOUNTPOINT}/etc/vconsole.conf
+echo "TIMEZONE=\"Europe/Kiev\"" >> ${MOUNTPOINT}/etc/vconsole.conf
+echo "USECOLOR=\"yes\"" >> ${MOUNTPOINT}/etc/vconsole.conf
+echo "FONT=\"ter-v16v\"" >> ${MOUNTPOINT}/etc/vconsole.conf
+
+# make fstab
+
+genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
+
+# set up hostname 
+
+echo "$host_name" > ${MOUNTPOINT}/etc/hostname
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i '/127.0.0.1/s/$/ '${host_name}'/' /etc/hosts"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i '/::1/s/$/ '${host_name}'/' /etc/hosts"
+
+# setup timezone
+
+arch-chroot $MOUNTPOINT /bin/bash -c "ln -sf /usr/share/zoneinfo/${ZONE}/${SUBZONE} /etc/localtime"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i '/#NTP=/d' /etc/systemd/timesyncd.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#Fallback//' /etc/systemd/timesyncd.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "echo \"FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 0.fr.pool.ntp.org\" >> /etc/systemd/timesyncd.conf"
+arch-chroot $MOUNTPOINT /bin/bash -c "systemctl enable systemd-timesyncd.service"
+
+# setup locale
+
+echo 'LANG="'$LOCALE_UTF8'"' > ${MOUNTPOINT}/etc/locale.conf
+arch-chroot $MOUNTPOINT /bin/bash -c "sed -i 's/#'${LOCALE_UTF8}'/'${LOCALE_UTF8}'/' /etc/locale.gen"
+arch-chroot $MOUNTPOINT /bin/bash -c "locale-gen"
+
+# setup kernel
+
+sed -i '/^HOOK/s/block/block keymap consolefont/' ${MOUNTPOINT}/etc/mkinitcpio.conf
+arch-chroot $MOUNTPOINT /bin/bash -c "mkinitcpio -p linux"
+
+# setup bootloader 
+
+pacstrap ${MOUNTPOINT} grub os-prober
+arch-chroot $MOUNTPOINT /bin/bash -c "grub-install --target=i386-pc --recheck --debug ${BOOT_MOUNTPOINT}"
+arch-chroot $MOUNTPOINT /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
+
+# setup root password
+arch-chroot $MOUNTPOINT /bin/bash -c "passwd"
