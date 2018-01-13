@@ -1,0 +1,8 @@
+#!/bin/bash
+
+pacman -Syyu
+pacman -S --noconfirm  --needed nvidia nvidia-utils libglvnd 
+pacman -S --needed lib32-nvidia-utils
+
+mkinitcpio -p linux
+nvidia-xconfig --add-argb-glx-visuals --allow-glx-with-composite --composite -no-logo --render-accel -o /etc/X11/xorg.conf.d/20-nvidia.conf
